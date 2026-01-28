@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* Professional Fonts Import */
+
+
+@theme {
+  --font-inter: 'Inter', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+
+  --color-cyber-black: #0F0F0F;
+  --color-cyber-dark: #151515;
+  --color-cyber-card: #202020;
+  --color-cyber-yellow: #E6C200;
+  --color-cyber-yellow-hover: #CCAD00;
+  --color-cyber-text: #F2F2F2;
+  --color-cyber-text-secondary: #9A9A9A;
+  --color-cyber-text-muted: #666666;
+  --color-cyber-border: #2A2A2A;
+  --color-cyber-border-hover: #404040;
+}
+
+:root {
+  --background: var(--color-cyber-black);
+  --foreground: var(--color-cyber-text);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-cyber-black);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Utilities */
+.pro-card {
+  background: rgba(24, 24, 27, 0.6);
+  /* Zinc-900 with opacity */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.input-pro:focus {
+  border-color: var(--color-cyber-yellow);
+  box-shadow: 0 0 0 1px var(--color-cyber-yellow);
+}
