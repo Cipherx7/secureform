@@ -58,9 +58,9 @@ GET http://localhost:3000/api/setup-admin
 Header: x-setup-secret: <your-SETUP_SECRET-from-env>
 ```
 
-This will create a default admin:
-- **Email**: `admin@cyberx.com`
-- **Password**: `admin123` (Change immediately after login!)
+This will create a default admin using credentials configured in your environment variables.
+
+**Note**: Ensure you change the password immediately after your first login!
 
 **Admin Login URL**: [http://localhost:3000/hot_admin](http://localhost:3000/hot_admin)
 
