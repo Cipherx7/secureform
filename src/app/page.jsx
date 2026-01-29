@@ -280,7 +280,8 @@ export default function CyberXHiring() {
 
         {/* Header / Logo */}
         {/* Logo - Top Left Absolute */}
-        <div className="absolute top-6 left-6 md:top-8 md:left-12 w-48 h-16 md:w-72 md:h-24 z-20">
+        {/* Logo - Mobile: Centered Relative | Desktop: Top-Left Absolute */}
+        <div className="relative mx-auto mt-8 mb-4 w-72 h-24 md:absolute md:top-8 md:left-12 md:m-0 md:w-96 md:h-32 z-20">
           <Image
             src="/assets/logo.png"
             alt="CyberX Logo"
@@ -291,7 +292,7 @@ export default function CyberXHiring() {
         </div>
 
         {/* Center Header Text */}
-        <div className="flex flex-col items-center mb-16 pt-24 md:pt-16">
+        <div className="flex flex-col items-center mb-16 pt-4 md:pt-16">
           <h2 className="text-xl md:text-2xl font-poppins font-semibold text-white text-center mb-1 tracking-wide">
             Become a Part of
           </h2>
