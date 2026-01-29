@@ -63,10 +63,10 @@ export default function AdminLogin() {
       {/* Brand Logo */}
       <div className="mb-8 relative w-64 h-24 md:w-96 md:h-32">
         <Image
-          src="/assets/logo_v2.png"
+          src="/assets/logo.png"
           alt="CyberX Logo"
           fill
-          className="object-contain mix-blend-screen"
+          className="object-contain"
           priority
         />
       </div>

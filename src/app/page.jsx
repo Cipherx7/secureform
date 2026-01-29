@@ -282,10 +282,10 @@ export default function CyberXHiring() {
         {/* Logo - Top Left Absolute */}
         <div className="absolute top-6 left-6 md:top-8 md:left-12 w-48 h-16 md:w-72 md:h-24 z-20">
           <Image
-            src="/assets/logo_v2.png"
+            src="/assets/logo.png"
             alt="CyberX Logo"
             fill
-            className="object-contain mix-blend-screen"
+            className="object-contain"
             priority
           />
         </div>
