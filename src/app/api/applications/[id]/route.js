@@ -114,13 +114,18 @@ export async function PATCH(request, { params }) {
   }
 }
 
+import { join } from 'path';
+import { unlink } from 'fs/promises';
+
 export async function DELETE(request, { params }) {
   if (!await checkAuth(request)) return unauthorizedResponse();
   try {
     await dbConnect();
 
     const { id } = params;
-    const application = await Application.findByIdAndDelete(id);
+
+    // Find application first to get resume path
+    const application = await Application.findById(id);
 
     if (!application) {
       return Response.json(
@@ -129,8 +134,25 @@ export async function DELETE(request, { params }) {
       );
     }
 
+    // Delete resume file if it exists
+    if (application.resumePath) {
+      try {
+        // resumePath is stored as "/resumes/filename.pdf"
+        // We need to construct the full system path: process.cwd() + /public + resumePath
+        const filePath = join(process.cwd(), 'public', application.resumePath);
+        await unlink(filePath);
+        console.log(`Deleted resume file: ${filePath}`);
+      } catch (err) {
+        // If file doesn't exist or other error, log it but continue with DB deletion
+        console.error('Error deleting resume file:', err);
+      }
+    }
+
+    // Delete from database
+    await Application.findByIdAndDelete(id);
+
     return Response.json({
-      message: 'Application deleted successfully'
+      message: 'Application and associated files deleted successfully'
     });
   } catch (error) {
     console.error('Delete application error:', error);
