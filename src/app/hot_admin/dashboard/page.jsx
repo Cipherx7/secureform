@@ -179,7 +179,7 @@ export default function AdminDashboard() {
             <input type="text" placeholder="Search applications..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg py-2 px-4 text-sm text-[#F2F2F2] placeholder-[#555] focus:outline-none focus:border-[#E6C200]/50 transition-colors" />
           </div>
-          <button onClick={handleLogout} className="text-sm text-[#9A9A9A] hover:text-[#F2F2F2] transition-colors">Sign out</button>
+          <button onClick={handleLogout} className="text-sm text-[#9A9A9A] hover:text-[#F2F2F2] transition-colors cursor-pointer">Sign out</button>
         </div>
       </header>
 

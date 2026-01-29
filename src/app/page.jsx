@@ -216,9 +216,15 @@ export default function CyberXHiring() {
 
       return newState;
     });
+
+    // Validations: Clear error when user types/selects
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const onSubmit = async (e) => {
+    // ... (rest of function unchanged, just need to bridge the gap if I cut too much, but I will target carefully)
     e.preventDefault();
     setSubmitError('');
     setSuccess(false);
@@ -279,7 +285,6 @@ export default function CyberXHiring() {
       <main className="w-full max-w-4xl">
 
         {/* Header / Logo */}
-        {/* Logo - Top Left Absolute */}
         {/* Logo - Mobile: Centered Relative | Desktop: Top-Left Absolute */}
         <div className="relative mx-auto mt-8 mb-4 w-72 h-24 md:absolute md:top-8 md:left-12 md:m-0 md:w-96 md:h-32 z-20">
           <Image
@@ -600,7 +605,7 @@ export default function CyberXHiring() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-auto px-8 py-3 bg-cyber-yellow hover:bg-cyber-yellow-hover text-black font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                className="w-full md:w-auto px-8 py-3 bg-cyber-yellow hover:bg-cyber-yellow-hover text-black font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base cursor-pointer"
               >
                 {loading ? 'Submitting Application...' : 'Submit Application'}
               </button>
