@@ -1,6 +1,7 @@
 import dbConnect from '../../../../../lib/mongodb';
 import Application from '../../../../../models/Application';
 import { verifyAdmin, unauthorizedResponse } from '../../../../../lib/auth-utils';
+import { del } from '@vercel/blob';
 
 async function checkAuth(req) {
   const isAuthorized = await verifyAdmin(req);
@@ -13,7 +14,8 @@ export async function GET(request, { params }) {
   try {
     await dbConnect();
 
-    const { id } = params;
+    // Next.js 15+ requires awaiting params
+    const { id } = await params;
     const application = await Application.findById(id);
 
     if (!application) {
@@ -38,7 +40,7 @@ export async function PUT(request, { params }) {
   try {
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
     const updateData = await request.json();
 
     const application = await Application.findByIdAndUpdate(
@@ -75,10 +77,12 @@ export async function PATCH(request, { params }) {
   try {
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
     const { status } = await request.json();
 
-    if (!status || !['pending', 'shortlisted', 'selected', 'rejected'].includes(status)) {
+    const validStatuses = ['pending', 'shortlisted', 'selected', 'rejected', 'approved'];
+
+    if (!status || !validStatuses.includes(status)) {
       return Response.json(
         { error: 'Invalid status' },
         { status: 400 }
@@ -114,15 +118,12 @@ export async function PATCH(request, { params }) {
   }
 }
 
-import { join } from 'path';
-import { unlink } from 'fs/promises';
-
 export async function DELETE(request, { params }) {
   if (!await checkAuth(request)) return unauthorizedResponse();
   try {
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
 
     // Find application first to get resume path
     const application = await Application.findById(id);
@@ -134,17 +135,14 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // Delete resume file if it exists
+    // Delete resume file from Vercel Blob if it exists
     if (application.resumePath) {
       try {
-        // resumePath is stored as "/resumes/filename.pdf"
-        // We need to construct the full system path: process.cwd() + /public + resumePath
-        const filePath = join(process.cwd(), 'public', application.resumePath);
-        await unlink(filePath);
-        console.log(`Deleted resume file: ${filePath}`);
+        // resumePath should be the full blob URL
+        await del(application.resumePath);
+        console.log(`Deleted resume blob: ${application.resumePath}`);
       } catch (err) {
-        // If file doesn't exist or other error, log it but continue with DB deletion
-        console.error('Error deleting resume file:', err);
+        console.error('Error deleting resume blob:', err);
       }
     }
 
