@@ -1,8 +1,6 @@
 import dbConnect from '../../../../lib/mongodb';
 import Application from '../../../../models/Application';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-import fs from 'fs';
+import { put } from '@vercel/blob';
 import { verifyAdmin, unauthorizedResponse } from '../../../../lib/auth-utils';
 
 // Simple in-memory rate limiting store
@@ -107,23 +105,21 @@ export async function POST(request) {
     // Handle resume file upload
     let resumePath = null;
     if (resumeFile && resumeFile.size > 0) {
-      const bytes = await resumeFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      // Create unique filename
+      /* 
+         VERCEL BLOB INTEGRATION 
+         Replaces local fs.writeFile which doesn't work in serverless
+      */
       const timestamp = Date.now();
-      const filename = `resume_${data.email.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.pdf`;
-      resumePath = join(process.cwd(), 'public', 'resumes', filename);
+      // Sanitize email for filename
+      const safeEmail = data.email.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `resumes/${safeEmail}_${timestamp}.pdf`;
 
-      // Ensure directory exists
-      const dir = join(process.cwd(), 'public', 'resumes');
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
+      // Upload to Vercel Blob
+      const blob = await put(filename, resumeFile, {
+        access: 'public',
+      });
 
-      // Write file
-      await writeFile(resumePath, buffer);
-      data.resumePath = `/resumes/${filename}`;
+      resumePath = blob.url; // Store the public URL
     }
 
     // Map new form fields to existing schema
@@ -156,7 +152,7 @@ export async function POST(request) {
       },
       hasOtherClubs: data.ctfParticipation || '',
       timeAvailability: data.currentStatus || '',
-      resumePath: data.resumePath || '',
+      resumePath: resumePath || '',
       // Store all new fields in a metadata object for future use
       metadata: {
         currentStatus: data.currentStatus,
