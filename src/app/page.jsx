@@ -16,17 +16,7 @@ const DOMAIN_INTERESTS = [
   'Threat Intelligence'
 ];
 
-const CONTRIBUTION_ROLES = [
-  'SOC / Blue Team',
-  'Red Team / Pentesting',
-  'Research & Threat Analysis',
-  'Tool Development / Automation',
-  'Content & Documentation',
-  'Social Media, Graphics Design & Video Editing',
-  'Community Management',
-  'Events & Workshops Support',
-  'Cyber Awareness & Training'
-];
+const CONTRIBUTION_ROLES = [];
 
 
 const STATUS_OPTIONS = [
@@ -543,6 +533,29 @@ export default function CyberXHiring() {
             </Section>
 
             <Section title="Contribution Areas">
+              <div className="mb-6 space-y-6 text-sm text-cyber-text-secondary">
+                <div>
+                  <p className="mb-2"><span className="text-white font-medium">Primary Contribution:</span> Selection will be based on the individual’s core domain expertise in which they are shortlisted.</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Open-source cybersecurity and hacking-related tools</li>
+                    <li>Content creation in the form of PDFs, documentation, and structured learning material</li>
+                    <li>Designing and developing hands-on labs and practical exercises</li>
+                    <li>Conducting online sessions, workshops, or knowledge-sharing talks on relevant topics</li>
+                    <li>Researching emerging cybersecurity trends and publishing technical insights</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-2"><span className="text-white font-medium">Secondary Contribution:</span> This includes interest-based contributions outside the primary cybersecurity domain.</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Social media handling and community engagement</li>
+                    <li>Website management and content updates</li>
+                    <li>Supporting tool development and maintenance</li>
+                    <li>Partnership management and collaboration with companies and communities</li>
+                    <li>Event organization, coordination, and related creative or design work</li>
+                  </ul>
+                </div>
+              </div>
               <CheckboxGrid
                 values={ui.contributionAreas}
                 options={CONTRIBUTION_ROLES}
