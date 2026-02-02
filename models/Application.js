@@ -18,7 +18,7 @@ const ApplicationSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  
+
   // Academic Information (repurposed for CyberX)
   branch: {
     type: String,
@@ -32,7 +32,7 @@ const ApplicationSchema = new mongoose.Schema({
     trim: true,
     comment: 'Year of study or work experience'
   },
-  
+
   // Role Preferences
   primaryRole: {
     type: String,
@@ -43,7 +43,7 @@ const ApplicationSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  
+
   // Experience and Motivation
   whyThisRole: {
     type: String,
@@ -54,28 +54,28 @@ const ApplicationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     comment: 'Detailed experience and background information'
   },
-  
+
   // Other Activities
   hasOtherClubs: {
     type: String,
     trim: true,
     comment: 'CTF participation'
   },
-  
+
   // Availability
   timeAvailability: {
     type: String,
     trim: true,
     comment: 'Current status'
   },
-  
+
   // Resume file path
   resumePath: {
     type: String,
     trim: true,
     comment: 'Path to uploaded resume file'
   },
-  
+
   // Metadata for new form fields (flexible storage)
   metadata: {
     currentStatus: String,
@@ -97,7 +97,7 @@ const ApplicationSchema = new mongoose.Schema({
     contributionAreas: [String],
     declarationAccepted: Boolean
   },
-  
+
   // Admin Fields
   status: {
     type: String,
@@ -112,7 +112,7 @@ const ApplicationSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  
+
   // Timestamps
   submittedAt: {
     type: Date,
