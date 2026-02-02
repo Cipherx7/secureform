@@ -556,15 +556,6 @@ export default function CyberXHiring() {
                   </ul>
                 </div>
               </div>
-              <CheckboxGrid
-                values={ui.contributionAreas}
-                options={CONTRIBUTION_ROLES}
-                onToggle={(value) => {
-                  setUi(prev => ({ ...prev, contributionAreas: toggleInArray(prev.contributionAreas, value) }));
-                  if (errors.contributionAreas) setErrors(prev => ({ ...prev, contributionAreas: undefined }));
-                }}
-                error={fe('contributionAreas')}
-              />
             </Section>
 
             <Section title="Declaration">
