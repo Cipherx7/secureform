@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const DOMAIN_INTERESTS = [
@@ -28,60 +28,66 @@ const CONTRIBUTION_ROLES = [
   'Cyber Awareness & Training'
 ];
 
-/* --- OPTIONS CONSTANTS --- */
-const QUALIFICATION_OPTIONS = [
-  'Diploma',
-  'B.E. / B.Tech',
-  'B.Sc',
-  'BCA',
-  'M.E. / M.Tech',
-  'M.Sc',
-  'MCA',
-  'Certification-Only (No formal degree)',
-  'Other (Please specify)'
+
+const STATUS_OPTIONS = [
+  'I am a UG/PG student studying in Computer Science',
+  'I am a UG/PG student studying in a non–computer science–related degree',
+  'I am a working professional',
+  'I have just passed out and am looking for a working opportunity'
 ];
 
-const BRANCH_OPTIONS = [
-  'Computer Science Engineering (CSE)',
-  'Information Technology (IT)',
-  'Cyber Security',
-  'Artificial Intelligence and Data Science',
-  'Artificial Intelligence & Machine Learning',
-  'Electronics & Telecommunication (ENTC)',
-  'Electronics Engineering',
-  'Electrical Engineering',
-  'Mechanical Engineering',
-  'Civil Engineering',
-  'Computer Science',
-  'Mathematics',
-  'Physics',
-  'Statistics',
-  'Non-Technical Background',
-  'Career Transition / Domain Shift',
-  'Other (Please specify)'
+const FAQ_DATA = [
+  {
+    question: "What is CyberX?",
+    answer: "CyberX is a community driven by students and professionals dedicated to cybersecurity. We organize CTF competitions, workshops, and events to spread awareness, mentor students, and facilitate knowledge sharing."
+  },
+  {
+    question: "Who can join CyberX?",
+    answer: "Students, professionals, and enthusiasts who are passionate about cybersecurity and willing to contribute to the community can apply."
+  },
+  {
+    question: "Is this an internship?",
+    answer: "No, this is a volunteer community core team member role, not a formal corporate internship."
+  },
+  {
+    question: "Is this a paid role?",
+    answer: "No, this is not a paid position. However, core members get exclusive perks such as free access to paid events, conferences, and workshops hosted by partner communities and organizations."
+  },
+  {
+    question: "What is the time commitment?",
+    answer: "We expect active participation in community events and tasks, but it is flexible to accommodate your studies or work."
+  },
+  {
+    question: "What CyberX have done from start?",
+    answer: (
+      <span>
+        Please go through our{' '}
+        <a href="https://cyberx.community" target="_blank" rel="noopener noreferrer" className="text-cyber-yellow hover:underline">
+          website
+        </a>{' '}
+        and social media handles ({' '}
+        <a href="https://www.linkedin.com/company/cyberx-community" target="_blank" rel="noopener noreferrer" className="text-cyber-yellow hover:underline">
+          LinkedIn
+        </a>
+        ,{' '}
+        <a href="https://www.instagram.com/cyberx_community" target="_blank" rel="noopener noreferrer" className="text-cyber-yellow hover:underline">
+          Instagram
+        </a>
+        ,{' '}
+        <a href="https://www.commudle.com/communities/cyberx" target="_blank" rel="noopener noreferrer" className="text-cyber-yellow hover:underline">
+          Commudle
+        </a>{' '}
+        ) to know about our past events, CTFs, and community activities.
+      </span>
+    )
+  }
 ];
 
-const YEAR_OPTIONS_STUDENT = [
-  '1st Year',
-  '2nd Year',
-  '3rd Year',
-  '4th Year'
-];
-
-const YEAR_OPTIONS_PROFESSIONAL = [
-  'Fresher (0–1 year)',
-  '1–2 years',
-  '2–3 years',
-  '3–5 years',
-  '5+ years'
-];
-
-const YEAR_OPTIONS_SELF = [
-  'Less than 6 months',
-  '6 months – 1 year',
-  '1–2 years',
-  '2+ years',
-  'Other (Please specify)'
+const LEARNING_OPTIONS = [
+  'I am learning through YouTube, blogs, Courses',
+  'I am learning through TryHackMe, Hack The Box and other like platforms',
+  'I have joined a training institute',
+  'I have done certification from EC-Council, INE, OffSec, THM and others'
 ];
 
 const toggleInArray = (arr, value) =>
@@ -92,45 +98,56 @@ export default function CyberXHiring() {
     fullName: '',
     email: '',
     whatsappNumber: '',
-    cityState: '',
+    // cityState removed
     organizationName: '',
 
-    currentStatus: '', // Student | Working Professional | Self-Learner
+    statusDescription: '',
 
-    highestQualification: '',
-    highestQualificationCustom: '', // New field for "Other"
 
-    specialization: '',
-    specializationCustom: '', // New field for "Other"
 
-    yearOfStudyOrWorkExp: '',
-    yearOfStudyCustom: '', // New field for "Other"
 
-    skillLevel: '',
-    handsOnDuration: '',
 
     domainInterests: [],
+    domainLevels: {}, // { "Web Application Security": "Intermediate", ... }
 
-    platformsUsed: '',
+    platformsUsed: [],
+    certificationDetails: '',
+    platformProfileLink: '',
     profileLinks: '',
     ctfParticipation: '',
-    ctfAchievements: '',
+    // ctfAchievements removed
 
-    projectsDescription: '',
-    portfolioLink: '',
-
-    followsEthics: '',
-    unauthorizedTesting: '',
-    unauthorizedExplanation: '',
+    // projectsDescription removed
+    // portfolioLink removed
+    // Ethics fields removed
     whyJoinCyberX: '',
 
     contributionAreas: [],
 
-    resumeFile: null,
     declarationAccepted: false,
 
     companyWebsite: '' // honeypot
   });
+
+  const STORAGE_KEY = 'cyberx_form_draft';
+
+  // Load saved state on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUi(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error('Failed to load draft', e);
+      }
+    }
+  }, []);
+
+  // Save state on change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ui));
+  }, [ui]);
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -148,50 +165,39 @@ export default function CyberXHiring() {
     if (!ui.fullName) e.fullName = 'Required';
     if (!ui.email) e.email = 'Required';
     if (!ui.whatsappNumber) e.whatsappNumber = 'Required';
-    if (!ui.cityState) e.cityState = 'Required';
+    if (!ui.fullName) e.fullName = 'Required';
+    if (!ui.email) e.email = 'Required';
+    if (!ui.whatsappNumber) e.whatsappNumber = 'Required';
+    // cityState validation removed
     if (!ui.organizationName) e.organizationName = 'Required';
 
-    if (!ui.currentStatus) e.currentStatus = 'Required';
+    if (!ui.statusDescription) e.statusDescription = 'Required';
+    if (!ui.platformsUsed.length) e.platformsUsed = 'Select at least one';
+    if (ui.platformsUsed.includes('I have done certification from EC-Council, INE, OffSec, THM and others') && !ui.certificationDetails) {
+      e.certificationDetails = 'Please specify your certifications';
+    }
+    if (!ui.profileLinks) e.profileLinks = 'Required';
 
-    if (!ui.highestQualification) e.highestQualification = 'Required';
-    if (ui.highestQualification === 'Other (Please specify)' && !ui.highestQualificationCustom) {
-      e.highestQualificationCustom = 'Please specify your qualification';
+
+
+
+    if (!ui.domainInterests.length) {
+      e.domainInterests = 'Select at least one';
+    } else {
+      ui.domainInterests.forEach(interest => {
+        if (!ui.domainLevels[interest]) {
+          e[`level_${interest}`] = 'Required';
+        }
+      });
     }
 
-    if (!ui.specialization) e.specialization = 'Required';
-    if (ui.specialization === 'Other (Please specify)' && !ui.specializationCustom) {
-      e.specializationCustom = 'Please specify your branch/specialization';
-    }
+    // projectsDescription validation removed
 
-    if (!ui.yearOfStudyOrWorkExp) e.yearOfStudyOrWorkExp = 'Required';
-    if (ui.yearOfStudyOrWorkExp === 'Other (Please specify)' && !ui.yearOfStudyCustom) {
-      e.yearOfStudyCustom = 'Please specify your experience';
-    }
-
-    if (!ui.skillLevel) e.skillLevel = 'Required';
-    if (!ui.handsOnDuration) e.handsOnDuration = 'Required';
-    if (!ui.domainInterests.length) e.domainInterests = 'Select at least one';
-
-    if (!ui.projectsDescription) e.projectsDescription = 'Required';
-
-    // Conditional ethics validation
-    if (!ui.followsEthics) e.followsEthics = 'Required';
-    if (!ui.unauthorizedTesting) e.unauthorizedTesting = 'Required';
-    if (ui.unauthorizedTesting === 'Yes' && ui.unauthorizedExplanation.length < 20)
-      e.unauthorizedExplanation = 'Minimum 20 characters';
-
+    // Ethics validation removed
     if (!ui.whyJoinCyberX || ui.whyJoinCyberX.length < 20)
       e.whyJoinCyberX = 'Minimum 20 characters';
 
     if (!ui.contributionAreas.length) e.contributionAreas = 'Select at least one role';
-
-    if (!ui.resumeFile) {
-      e.resumeFile = 'Resume is required';
-    } else if (ui.resumeFile.type !== 'application/pdf') {
-      e.resumeFile = 'Only PDF allowed';
-    } else if (ui.resumeFile.size > 2 * 1024 * 1024) {
-      e.resumeFile = 'Max size 2MB';
-    }
 
     if (!ui.declarationAccepted) e.declarationAccepted = 'Required';
 
@@ -208,11 +214,7 @@ export default function CyberXHiring() {
         [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value
       };
 
-      // Reset dependent fields if Status changes
-      if (name === 'currentStatus') {
-        newState.yearOfStudyOrWorkExp = ''; // Reset year selection
-        newState.yearOfStudyCustom = '';
-      }
+
 
       return newState;
     });
@@ -242,7 +244,13 @@ export default function CyberXHiring() {
     const formData = new FormData();
 
     Object.entries(ui).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
+      if (key === 'domainLevels') {
+        Object.entries(value).forEach(([domain, level]) => {
+          if (ui.domainInterests.includes(domain)) {
+            formData.append(`domainLevels[${domain}]`, level);
+          }
+        });
+      } else if (Array.isArray(value)) {
         value.forEach(v => formData.append(`${key}[]`, v));
       } else if (value !== null) {
         formData.append(key, value);
@@ -259,6 +267,8 @@ export default function CyberXHiring() {
       if (!res.ok) throw new Error();
 
       localStorage.setItem(duplicateKey, 'submitted');
+      // Clear draft on successful submission
+      localStorage.removeItem(STORAGE_KEY);
       setSuccess(true);
     } catch {
       setSubmitError('Submission failed. Try again later.');
@@ -269,14 +279,14 @@ export default function CyberXHiring() {
 
   const fe = (n) => touched[n] && errors[n];
 
-  /* ---------- HELPER FOR YEAR OPTIONS ---------- */
+  // Helper function to get year options based on currentStatus
   const getYearOptions = () => {
-    switch (ui.currentStatus) {
-      case 'Student': return YEAR_OPTIONS_STUDENT;
-      case 'Working Professional': return YEAR_OPTIONS_PROFESSIONAL;
-      case 'Self-Learner': return YEAR_OPTIONS_SELF;
-      default: return [];
+    if (ui.statusDescription.includes('student')) {
+      return ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year', 'Other (Please specify)'];
+    } else if (ui.statusDescription.includes('professional')) {
+      return ['< 1 Year', '1-2 Years', '2-5 Years', '5-10 Years', '> 10 Years', 'Other (Please specify)'];
     }
+    return ['Other (Please specify)'];
   };
 
   /* ---------- UI ---------- */
@@ -302,7 +312,9 @@ export default function CyberXHiring() {
             Become a Part of
           </h2>
           <h1 className="text-3xl md:text-5xl font-poppins font-extrabold text-white text-center mb-4 tracking-tight">
-            CYBER<span className="text-cyber-yellow">X</span> Community
+            <DecryptedText text="Cyber" />
+            <span className="text-cyber-yellow"><DecryptedText text="X" /></span>
+            <DecryptedText text=" Community" />
           </h1>
           <p className="text-[#B3B3B3] text-center max-w-lg text-sm md:text-base font-medium">
             Connecting motivated learners and practitioners in cybersecurity.
@@ -336,132 +348,175 @@ export default function CyberXHiring() {
                 <Field label="Mobile / WhatsApp Number" required error={fe('whatsappNumber')}>
                   <Input name="whatsappNumber" value={ui.whatsappNumber} onChange={onChange} placeholder="+91 98765 43210" />
                 </Field>
-                <Field label="City & State" required error={fe('cityState')}>
-                  <Input name="cityState" value={ui.cityState} onChange={onChange} placeholder="Nashik, Maharashtra" />
-                </Field>
-                <Field label="College / Organization Name" required error={fe('organizationName')} className="md:col-span-2">
-                  <Input name="organizationName" value={ui.organizationName} onChange={onChange} placeholder="Enter your college or organization name" />
+                <Field label="LinkedIn Profile URL" required error={fe('profileLinks')}>
+                  <Input name="profileLinks" value={ui.profileLinks} onChange={onChange} placeholder="https://www.linkedin.com/in/..." />
+                  <p className="mt-2 text-xs text-cyber-text-muted">
+                    * Make sure you have an updated LinkedIn profile.
+                  </p>
                 </Field>
               </div>
             </Section>
 
             <Section title="Current Status & Education">
-              {/* CURRENT STATUS */}
+              {/* STATUS DESCRIPTION */}
               <div className="mb-6">
                 <RadioRow
-                  label="Current Status"
-                  name="currentStatus"
-                  value={ui.currentStatus}
+                  label="What describes me the best?"
+                  name="statusDescription"
+                  value={ui.statusDescription}
                   onChange={onChange}
-                  error={fe('currentStatus')}
-                  options={['Student', 'Working Professional', 'Self-Learner']}
+                  error={fe('statusDescription')}
+                  options={STATUS_OPTIONS}
+                  vertical={true}
                 />
               </div>
 
+              {/* CONDITIONAL COLLEGE / ORGANIZATION NAME */}
+              {ui.statusDescription && (
+                <div className="mb-6 animate-fade-in">
+                  <Field
+                    label={ui.statusDescription === 'I am a working professional' ? 'Organization Name' : 'College Name'}
+                    required
+                    error={fe('organizationName')}
+                  >
+                    <Input
+                      name="organizationName"
+                      value={ui.organizationName}
+                      onChange={onChange}
+                      placeholder={ui.statusDescription === 'I am a working professional' ? 'Enter your organization name' : 'Enter your college name'}
+                    />
+                  </Field>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-                {/* HIGHEST QUALIFICATION */}
-                <div className="flex flex-col gap-2">
-                  <Field label="Highest Qualification" required error={fe('highestQualification')}>
-                    <Select name="highestQualification" value={ui.highestQualification} onChange={onChange}>
-                      <option value="">Select Qualification</option>
-                      {QUALIFICATION_OPTIONS.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </Select>
-                  </Field>
-                  {ui.highestQualification === 'Other (Please specify)' && (
-                    <Field label="Please specify your qualification" required error={fe('highestQualificationCustom')}>
-                      <Input name="highestQualificationCustom" value={ui.highestQualificationCustom} onChange={onChange} />
-                    </Field>
-                  )}
-                </div>
 
-                {/* BRANCH / SPECIALIZATION */}
-                <div className="flex flex-col gap-2">
-                  <Field label="Branch / Specialization" required error={fe('specialization')}>
-                    <Select name="specialization" value={ui.specialization} onChange={onChange}>
-                      <option value="">Select Branch</option>
-                      {BRANCH_OPTIONS.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </Select>
-                  </Field>
-                  {ui.specialization === 'Other (Please specify)' && (
-                    <Field label="Please specify your branch" required error={fe('specializationCustom')}>
-                      <Input name="specializationCustom" value={ui.specializationCustom} onChange={onChange} />
-                    </Field>
-                  )}
-                </div>
-
-                {/* YEAR OF STUDY / EXPERIENCE */}
-                {ui.currentStatus && (
-                  <div className="flex flex-col gap-2 md:col-span-2">
-                    <Field label="Year of Study / Experience" required error={fe('yearOfStudyOrWorkExp')}>
-                      <Select name="yearOfStudyOrWorkExp" value={ui.yearOfStudyOrWorkExp} onChange={onChange}>
-                        <option value="">Select Option</option>
-                        {getYearOptions().map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </Select>
-                    </Field>
-                    {ui.yearOfStudyOrWorkExp === 'Other (Please specify)' && (
-                      <Field label="Please specify your experience" required error={fe('yearOfStudyCustom')}>
-                        <Input name="yearOfStudyCustom" value={ui.yearOfStudyCustom} onChange={onChange} />
-                      </Field>
-                    )}
-                  </div>
-                )}
 
               </div>
             </Section>
 
-            <Section title="Cybersecurity Experience">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <Field label="Skill Level" required error={fe('skillLevel')}>
-                  <Select name="skillLevel" value={ui.skillLevel} onChange={onChange}>
-                    <option value="">Select Level</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                  </Select>
-                </Field>
-                <Field label="Hands-on Experience Duration" required error={fe('handsOnDuration')}>
-                  <Input name="handsOnDuration" value={ui.handsOnDuration} onChange={onChange} placeholder="e.g. 6 months" />
-                </Field>
-              </div>
-            </Section>
+
 
             <Section title="Cybersecurity Domain Interests">
-              <CheckboxGrid
-                values={ui.domainInterests}
-                options={DOMAIN_INTERESTS}
-                onToggle={(value) => {
-                  setUi(prev => ({ ...prev, domainInterests: toggleInArray(prev.domainInterests, value) }));
-                  if (errors.domainInterests) setErrors(prev => ({ ...prev, domainInterests: undefined }));
-                }}
-                error={fe('domainInterests')}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {DOMAIN_INTERESTS.map(interest => {
+                  const isSelected = ui.domainInterests.includes(interest);
+                  return (
+                    <div key={interest} className={`flex flex-col p-4 rounded-lg border transition-all duration-200 ${isSelected ? 'bg-cyber-card border-cyber-yellow/50' : 'bg-cyber-card border-cyber-border hover:border-cyber-border-hover'}`}>
+                      <div className="flex items-start cursor-pointer" onClick={() => {
+                        setUi(prev => {
+                          const newInterests = toggleInArray(prev.domainInterests, interest);
+                          const newLevels = { ...prev.domainLevels };
+                          if (!newInterests.includes(interest)) delete newLevels[interest];
+                          return { ...prev, domainInterests: newInterests, domainLevels: newLevels };
+                        });
+                      }}>
+                        <div className="flex h-5 items-center pointer-events-none">
+                          <input
+                            id={`domain-${interest}`}
+                            name="domainInterests"
+                            type="checkbox"
+                            checked={isSelected}
+                            readOnly
+                            className="h-4 w-4 rounded border-cyber-gray text-cyber-yellow focus:ring-cyber-yellow bg-cyber-black"
+                          />
+                        </div>
+                        <div className="ml-3 text-sm pointer-events-none">
+                          <label className={`font-medium ${isSelected ? 'text-white' : 'text-cyber-text-muted'} select-none`}>
+                            {interest}
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Level Selection for Selected Domain */}
+                      {isSelected && (
+                        <div className="mt-3 ml-7 animate-fade-in border-t border-cyber-border pt-3">
+                          <label className="block text-xs font-medium text-cyber-text-secondary mb-2">Proficiency Level</label>
+                          <div className="flex flex-wrap gap-2">
+                            {['Beginner', 'Intermediate', 'Advanced'].map(lvl => (
+                              <button
+                                key={lvl}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setUi(prev => ({ ...prev, domainLevels: { ...prev.domainLevels, [interest]: lvl } }))
+                                }}
+                                className={`px-3 py-1 text-xs rounded-full border transition-all ${ui.domainLevels[interest] === lvl
+                                  ? 'bg-cyber-yellow text-black border-cyber-yellow font-medium'
+                                  : 'bg-transparent text-cyber-text-muted border-cyber-border hover:border-cyber-text-muted hover:text-white'
+                                  }`}
+                              >
+                                {lvl}
+                              </button>
+                            ))}
+                          </div>
+                          {fe(`level_${interest}`) && <div className="mt-2 text-red-500 text-xs">{fe(`level_${interest}`)}</div>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {fe('domainInterests') && <div className="mt-3 text-red-500 text-xs font-medium px-1">{fe('domainInterests')}</div>}
             </Section>
 
             <Section title="Practical Exposure">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <Field label="Learning platforms used" required error={fe('platformsUsed')}>
-                  <Input name="platformsUsed" value={ui.platformsUsed} onChange={onChange} placeholder="e.g. TryHackMe, HackTheBox, PortSwigger" />
-                </Field>
-                <Field label="Profile links" error={fe('profileLinks')}>
-                  <Input name="profileLinks" value={ui.profileLinks} onChange={onChange} placeholder="LinkedIn, GitHub, or Portfolio URL" />
-                </Field>
+              <div className="flex flex-col gap-6">
+                <div>
+                  <label className="mb-3 text-sm font-medium text-cyber-text-secondary block">
+                    From where do you learn hacking, or how do you learn based on your selected domain expertise? <span className="text-cyber-yellow">*</span>
+                  </label>
+                  <div className="flex flex-col gap-3">
+                    {LEARNING_OPTIONS.map(opt => {
+                      const isSelected = ui.platformsUsed.includes(opt);
+                      return (
+                        <div
+                          key={opt}
+                          onClick={() => {
+                            setUi(prev => ({ ...prev, platformsUsed: toggleInArray(prev.platformsUsed, opt) }));
+                            if (errors.platformsUsed) setErrors(prev => ({ ...prev, platformsUsed: undefined }));
+                          }}
+                          className={`flex items-center px-4 py-3 rounded-lg border cursor-pointer transition-all duration-200
+                               ${isSelected
+                              ? 'bg-cyber-card border-cyber-yellow/50 text-white'
+                              : 'bg-cyber-card border-cyber-border text-cyber-text-muted hover:border-cyber-border-hover'
+                            }`}
+                        >
+                          <div className={`w-5 h-5 mr-3 rounded border flex items-center justify-center transition-all flex-shrink-0
+                                 ${isSelected ? 'bg-cyber-yellow border-cyber-yellow' : 'border-cyber-text-muted/40'}`}>
+                            {isSelected && (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-black" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="text-sm font-medium">{opt}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {fe('platformsUsed') && <div className="mt-1.5 text-red-500 text-xs font-medium">{fe('platformsUsed')}</div>}
+                </div>
+
+                {ui.platformsUsed.includes('I am learning through TryHackMe, Hack The Box and other like platforms') && (
+                  <div className="animate-fade-in">
+                    <Field label="Profile Link (TryHackMe / HackTheBox, etc.)" error={fe('platformProfileLink')}>
+                      <Input name="platformProfileLink" value={ui.platformProfileLink} onChange={onChange} placeholder="e.g. https://tryhackme.com/p/username" />
+                    </Field>
+                  </div>
+                )}
+
+                {ui.platformsUsed.includes('I have done certification from EC-Council, INE, OffSec, THM and others') && (
+                  <div className="animate-fade-in">
+                    <Field label="Certification Name(s)" required error={fe('certificationDetails')}>
+                      <Input name="certificationDetails" value={ui.certificationDetails} onChange={onChange} placeholder="e.g. CEH, OSCP, eJPT" />
+                    </Field>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 gap-6 mt-6">
-                <Field label="Project Description" required error={fe('projectsDescription')}>
-                  <Textarea name="projectsDescription" value={ui.projectsDescription} onChange={onChange} placeholder="Briefly describe a security-related project you've worked on." />
-                </Field>
-                <Field label="Portfolio Link (Optional)" error={fe('portfolioLink')}>
-                  <Input name="portfolioLink" value={ui.portfolioLink} onChange={onChange} placeholder="Link to additional work" />
-                </Field>
-              </div>
+
 
               <div className="mt-8 pt-6 border-t border-cyber-border">
                 <RadioRow
@@ -472,51 +527,11 @@ export default function CyberXHiring() {
                   error={fe('ctfParticipation')}
                   options={['Yes', 'No']}
                 />
-
-                {ui.ctfParticipation === 'Yes' && (
-                  <div className="mt-6 animate-fade-in">
-                    <Field label="CTF details" required error={fe('ctfAchievements')}>
-                      <Textarea
-                        name="ctfAchievements"
-                        value={ui.ctfAchievements}
-                        onChange={onChange}
-                        placeholder="Please mention specific CTFs, your rank, team name, and any notable achievements." />
-                    </Field>
-                  </div>
-                )}
               </div>
             </Section>
 
             <Section title="Motivation to Join CyberX">
-              <div className="grid grid-cols-1 gap-6 mb-8 p-6 bg-cyber-black/20 rounded-lg border border-cyber-border/50">
-                <RadioRow
-                  label="Do you follow ethical cybersecurity practices?"
-                  name="followsEthics"
-                  value={ui.followsEthics}
-                  onChange={onChange}
-                  error={fe('followsEthics')}
-                  options={['Yes', 'No']}
-                />
-                <RadioRow
-                  label="Have you ever performed unauthorized testing?"
-                  name="unauthorizedTesting"
-                  value={ui.unauthorizedTesting}
-                  onChange={onChange}
-                  error={fe('unauthorizedTesting')}
-                  options={['Yes', 'No']}
-                />
-                {ui.unauthorizedTesting === 'Yes' && (
-                  <Field label="Explanation" required error={fe('unauthorizedExplanation')}>
-                    <Textarea
-                      name="unauthorizedExplanation"
-                      value={ui.unauthorizedExplanation}
-                      onChange={onChange}
-                      placeholder="Please explain the context of the unauthorized testing."
-                    />
-                  </Field>
-                )}
-              </div>
-
+              {/* Ethics fields removed */}
               <Field label="Why do you want to join CyberX?" required error={fe('whyJoinCyberX')}>
                 <Textarea
                   name="whyJoinCyberX"
@@ -539,29 +554,8 @@ export default function CyberXHiring() {
               />
             </Section>
 
-            <Section title="Resume & Declaration">
-              <Field label="Resume Upload" required error={fe('resumeFile')}>
-                <div className="relative border border-dashed border-cyber-border-hover rounded-lg p-8 text-center hover:bg-cyber-card/50 transition-colors">
-                  <input
-                    type="file"
-                    name="resumeFile"
-                    accept=".pdf"
-                    onChange={onChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div className="flex flex-col items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyber-text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p className="text-sm font-medium text-cyber-text-secondary">
-                      {ui.resumeFile ? <span className="text-cyber-yellow">{ui.resumeFile.name}</span> : "Click to upload or drag and drop"}
-                    </p>
-                    <p className="text-xs text-cyber-text-muted mt-1">PDF only (Max 2MB)</p>
-                  </div>
-                </div>
-              </Field>
-
-              <div className="mt-8">
+            <Section title="Declaration">
+              <div className="mt-2">
                 <label className="flex items-start cursor-pointer group">
                   <div className="relative flex items-center pt-0.5">
                     <input
@@ -601,7 +595,7 @@ export default function CyberXHiring() {
             )}
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="pt-4 flex justify-end">
               <button
                 type="submit"
                 disabled={loading}
@@ -612,6 +606,18 @@ export default function CyberXHiring() {
             </div>
 
           </form>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="max-w-2xl mx-auto mb-20">
+          <h3 className="text-2xl font-poppins font-semibold text-white text-center mb-8">
+            Frequently Asked <span className="text-cyber-yellow">Questions</span>
+          </h3>
+          <div className="space-y-4">
+            {FAQ_DATA.map((faq, index) => (
+              <Disclosure key={index} question={faq.question} answer={faq.answer} />
+            ))}
+          </div>
         </div>
 
         {/* Footer */}
@@ -735,7 +741,7 @@ function CheckboxGrid({ options, values, onToggle, error }) {
   );
 }
 
-function RadioRow({ name, value, options, onChange, error, label }) {
+function RadioRow({ name, value, options, onChange, error, label, vertical = false }) {
   return (
     <div>
       {label && <label className="mb-3 text-sm font-medium text-cyber-text-secondary block">{label}</label>}
@@ -743,7 +749,8 @@ function RadioRow({ name, value, options, onChange, error, label }) {
         {options.map(opt => (
           <label
             key={opt}
-            className={`cursor-pointer px-5 py-2 rounded-full border transition-all duration-200 text-sm font-medium select-none
+            className={`cursor-pointer px-5 py-2 rounded-lg border transition-all duration-200 text-sm font-medium select-none
+               ${vertical ? 'w-full text-left' : ''}
                ${value === opt
                 ? 'bg-cyber-yellow text-black border-cyber-yellow'
                 : 'bg-transparent text-cyber-text-muted border-cyber-border hover:border-cyber-text-muted'
@@ -764,4 +771,67 @@ function RadioRow({ name, value, options, onChange, error, label }) {
       {error && <div className="mt-1.5 text-red-500 text-xs font-medium">{error}</div>}
     </div>
   );
+}
+
+function Disclosure({ question, answer }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border border-cyber-border rounded-lg bg-cyber-card overflow-hidden transition-all duration-200 hover:border-cyber-border-hover">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-4 text-left"
+      >
+        <span className="text-sm md:text-base font-medium text-white">{question}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`h-5 w-5 text-cyber-yellow transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div
+        className={`transition-all duration-200 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="p-4 pt-0 text-sm text-cyber-text-secondary leading-relaxed border-t border-cyber-border/50 mt-2">
+          {answer}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DecryptedText({ text, className = '' }) {
+  const [displayText, setDisplayText] = useState('');
+
+  useEffect(() => {
+    let iteration = 0;
+    const interval = setInterval(() => {
+      setDisplayText(
+        text
+          .split('')
+          .map((letter, index) => {
+            if (index < iteration) {
+              return text[index];
+            }
+            return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+'[Math.floor(Math.random() * 50)];
+          })
+          .join('')
+      );
+
+      if (iteration >= text.length) {
+        clearInterval(interval);
+      }
+
+      iteration += 1 / 3;
+    }, 30);
+
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return <span className={className}>{displayText}</span>;
 }
