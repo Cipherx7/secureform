@@ -187,7 +187,7 @@ export default function CyberXHiring() {
     if (!ui.whyJoinCyberX || ui.whyJoinCyberX.length < 20)
       e.whyJoinCyberX = 'Minimum 20 characters';
 
-    if (!ui.contributionAreas.length) e.contributionAreas = 'Select at least one role';
+
 
     if (!ui.declarationAccepted) e.declarationAccepted = 'Required';
 
